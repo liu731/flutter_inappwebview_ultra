@@ -87,7 +87,7 @@ void webViewWindows() {
 
       var windowId = await onCreateWindowCompleter.future;
 
-      final Completer windowControllerCompleter =
+      final Completer<InAppWebViewController> windowControllerCompleter =
           Completer<InAppWebViewController>();
       final Completer<String> windowPageLoaded = Completer<String>();
       final Completer<void> onCloseWindowCompleter = Completer<void>();
@@ -102,10 +102,9 @@ void webViewWindows() {
             onWebViewCreated: (controller) {
               windowControllerCompleter.complete(controller);
             },
-            onLoadStop: (controller, url) async {
+            onLoadStop: (controller, url) {
               if (url!.scheme != "about" && !windowPageLoaded.isCompleted) {
                 windowPageLoaded.complete(url.toString());
-                await controller.evaluateJavascript(source: "window.close();");
               }
             },
             onCloseWindow: (controller) {
@@ -118,8 +117,28 @@ void webViewWindows() {
       await tester.pump();
 
       final String windowUrlLoaded = await windowPageLoaded.future;
+      final InAppWebViewController windowController =
+          await windowControllerCompleter.future;
 
       expect(windowUrlLoaded, TEST_URL_EXAMPLE.toString());
+
+      expect(
+        await windowController.evaluateJavascript(
+          source: "1 + 1",
+          contentWorld: ContentWorld.PAGE,
+        ),
+        2,
+      );
+
+      final asyncResult = await windowController.callAsyncJavaScript(
+        functionBody: "return 42;",
+        contentWorld: ContentWorld.PAGE,
+      );
+      expect(asyncResult, isNotNull);
+      expect(asyncResult!.error, isNull);
+      expect(asyncResult.value, 42);
+
+      await windowController.evaluateJavascript(source: "window.close();");
       await expectLater(onCloseWindowCompleter.future, completes);
     }, skip: shouldSkipTest2);
 

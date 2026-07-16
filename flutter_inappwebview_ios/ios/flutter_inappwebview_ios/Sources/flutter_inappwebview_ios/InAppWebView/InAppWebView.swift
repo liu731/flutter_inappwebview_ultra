@@ -1568,6 +1568,20 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
             return
         }
+        // The content-world overload can dereference a null pointer for popup
+        // (windowId) WebViews on iOS 14-17. The legacy overload targets the
+        // main frame in the page world and avoids the WebKit crash.
+        // See https://github.com/pichillilorenzo/flutter_inappwebview/pull/2776.
+        if #unavailable(iOS 18.0), windowId != nil {
+            super.evaluateJavaScript(javaScript) { result, error in
+                if let error = error {
+                    completionHandler?(.failure(error))
+                } else {
+                    completionHandler?(.success(result as Any))
+                }
+            }
+            return
+        }
         super.evaluateJavaScript(javaScript, in: frame, in: contentWorld, completionHandler: completionHandler)
     }
     
@@ -1583,6 +1597,12 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     @available(iOS 14.0, *)
     public func callAsyncJavaScript(_ functionBody: String, arguments: [String : Any] = [:], frame: WKFrameInfo? = nil, contentWorld: WKContentWorld, completionHandler: ((Result<Any, Error>) -> Void)? = nil) {
         if let applePayAPIEnabled = settings?.applePayAPIEnabled, applePayAPIEnabled {
+            return
+        }
+        // WKWebView has no legacy async overload, so use its always-available
+        // page world for popup WebViews affected by the same iOS 14-17 crash.
+        if #unavailable(iOS 18.0), windowId != nil {
+            super.callAsyncJavaScript(functionBody, arguments: arguments, in: frame, in: WKContentWorld.page, completionHandler: completionHandler)
             return
         }
         super.callAsyncJavaScript(functionBody, arguments: arguments, in: frame, in: contentWorld, completionHandler: completionHandler)
