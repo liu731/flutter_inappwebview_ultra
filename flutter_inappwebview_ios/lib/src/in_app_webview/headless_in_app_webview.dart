@@ -460,5 +460,17 @@ extension InternalHeadlessInAppWebView on IOSHeadlessInAppWebView {
   Future<void> internalDispose() async {
     _started = false;
     _running = false;
+    // The native webview is taken over by the widget, which keeps using this
+    // id, so it must not be destroyed here. The controller must not be
+    // disposed either: callers may still hold it from onWebViewCreated, and
+    // web message listeners registered through it must keep receiving native
+    // messages. Its method-call handler slot is replaced by the widget's new
+    // controller immediately after this synchronous call, so nulling the
+    // references is enough to make the otherwise unreachable controller
+    // collectable. The headless channel itself is dead after the handoff
+    // (native disposes its delegate), so it can be unregistered.
+    disposeChannel();
+    _webViewController = null;
+    _controllerFromPlatform = null;
   }
 }
