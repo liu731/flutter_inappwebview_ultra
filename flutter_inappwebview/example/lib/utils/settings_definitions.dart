@@ -1,4 +1,4 @@
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_inappwebview_ultra/flutter_inappwebview.dart';
 import 'package:flutter_inappwebview_example/models/setting_definition.dart';
 
 List<T> _safeEnumValues<T>(Iterable<T> Function() getter) {

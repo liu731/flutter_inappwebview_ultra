@@ -1,0 +1,5 @@
+# Local-only resolution bridge until flutter_inappwebview_ultra_ios is on pub.dev.
+# This file is never published by pub.
+dependency_overrides:
+  flutter_inappwebview_ultra_ios:
+    path: ../flutter_inappwebview_ios

@@ -1,11 +1,8 @@
-name: flutter_inappwebview
-description: A Flutter plugin that allows you to add an inline webview, to use an headless webview, and to open an in-app browser window.
-version: 6.2.0-beta.3
-homepage: https://inappwebview.dev/
-repository: https://github.com/pichillilorenzo/flutter_inappwebview
-issue_tracker: https://github.com/pichillilorenzo/flutter_inappwebview/issues
-funding:
-  - https://inappwebview.dev/donate/
+name: flutter_inappwebview_ultra
+description: iOS-stability fork of flutter_inappwebview. Add an inline webview, use a headless webview, or open an in-app browser window.
+version: 1.0.0
+repository: https://github.com/liu731/flutter_inappwebview_ultra/tree/main/flutter_inappwebview
+issue_tracker: https://github.com/liu731/flutter_inappwebview_ultra/issues
 topics:
   - html
   - webview
@@ -24,7 +21,7 @@ dependencies:
     # path: ../flutter_inappwebview_platform_interface
   flutter_inappwebview_android: ^1.2.0-beta.3
     # path: ../flutter_inappwebview_android
-  flutter_inappwebview_ios: ^1.2.0-beta.3
+  flutter_inappwebview_ultra_ios: ^1.0.0
     # path: ../flutter_inappwebview_ios
   flutter_inappwebview_macos: ^1.2.0-beta.3
     # path: ../flutter_inappwebview_macos
@@ -55,7 +52,7 @@ flutter:
       android:
         default_package: flutter_inappwebview_android
       ios:
-        default_package: flutter_inappwebview_ios
+        default_package: flutter_inappwebview_ultra_ios
       macos:
         default_package: flutter_inappwebview_macos
       web:
@@ -66,8 +63,8 @@ flutter:
         default_package: flutter_inappwebview_linux
 
   assets:
-    - packages/flutter_inappwebview/assets/t_rex_runner/t-rex.html
-    - packages/flutter_inappwebview/assets/t_rex_runner/t-rex.css
+    - packages/flutter_inappwebview_ultra/assets/t_rex_runner/t-rex.html
+    - packages/flutter_inappwebview_ultra/assets/t_rex_runner/t-rex.css
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
   #  - images/a_dot_burr.jpeg

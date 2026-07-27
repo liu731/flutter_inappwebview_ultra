@@ -1,3 +1,23 @@
+# flutter_inappwebview_ultra
+
+An iOS-stability fork of [`flutter_inappwebview`](https://pub.dev/packages/flutter_inappwebview)
+(based on 6.2.0-beta.3) with additional crash and memory-leak fixes on iOS.
+Maintained at [liu731/flutter_inappwebview_ultra](https://github.com/liu731/flutter_inappwebview_ultra).
+
+```yaml
+dependencies:
+  flutter_inappwebview_ultra: ^1.0.0
+```
+
+```dart
+import 'package:flutter_inappwebview_ultra/flutter_inappwebview_ultra.dart';
+```
+
+The Dart API is identical to `flutter_inappwebview`; everything below is the
+upstream documentation and applies with the package name substituted.
+
+---
+
 <div align="center">
 
 # Flutter InAppWebView Plugin [![Share on Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Flutter%20InAppBrowser%20plugin!&url=https://github.com/pichillilorenzo/flutter_inappwebview&hashtags=flutter,flutterio,dart,dartlang,webview) [![Share on Facebook](https://img.shields.io/badge/share-facebook-blue.svg?longCache=true&style=flat&colorB=%234267b2)](https://www.facebook.com/sharer/sharer.php?u=https%3A//github.com/pichillilorenzo/flutter_inappwebview)

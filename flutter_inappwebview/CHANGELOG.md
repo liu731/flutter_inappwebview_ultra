@@ -1,3 +1,17 @@
+## 1.0.0
+
+First release as `flutter_inappwebview_ultra`, an iOS-stability fork of
+`flutter_inappwebview` based on 6.2.0-beta.3. The public Dart API is unchanged
+apart from the package name: replace
+`import 'package:flutter_inappwebview/flutter_inappwebview.dart'` with
+`import 'package:flutter_inappwebview_ultra/flutter_inappwebview_ultra.dart'`.
+
+iOS changes on top of the base version (via `flutter_inappwebview_ultra_ios`):
+
+- Fixed windowId JavaScript crash on iOS 14-17
+- Fixed callAsyncJavaScript crashes before iOS 18
+- Fixed Dart-side headless webview controller leak on conversion to widget
+
 ## 6.2.0-beta.3
 
 - Added Linux support

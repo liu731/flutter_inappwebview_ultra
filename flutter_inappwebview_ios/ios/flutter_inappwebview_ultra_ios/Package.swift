@@ -4,19 +4,19 @@
 import PackageDescription
 
 let package = Package(
-    name: "flutter_inappwebview_ios",
+    name: "flutter_inappwebview_ultra_ios",
     platforms: [
         .iOS("12.0"),
     ],
     products: [
-        .library(name: "flutter-inappwebview-ios", targets: ["flutter_inappwebview_ios"])
+        .library(name: "flutter-inappwebview-ultra-ios", targets: ["flutter_inappwebview_ultra_ios"])
     ],
     dependencies: [
       .package(url: "https://github.com/apple/swift-collections.git", from: "1.2.1")
     ],
     targets: [
         .target(
-            name: "flutter_inappwebview_ios",
+            name: "flutter_inappwebview_ultra_ios",
             dependencies: [
                 .product(name: "Collections", package: "swift-collections")
             ],

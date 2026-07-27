@@ -1,4 +1,4 @@
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_inappwebview_ultra/flutter_inappwebview.dart';
 
 InAppWebViewSettings defaultInAppWebViewSettings() {
   return InAppWebViewSettings();

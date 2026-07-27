@@ -1,4 +1,4 @@
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_inappwebview_ultra/flutter_inappwebview.dart';
 import 'package:integration_test/integration_test.dart';
 
 import 'process_global_config/main.dart' as process_global_config_tests;

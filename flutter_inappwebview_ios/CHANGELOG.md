@@ -1,3 +1,13 @@
+## 1.0.0
+
+First release as `flutter_inappwebview_ultra_ios`, the iOS implementation of
+the `flutter_inappwebview_ultra` iOS-stability fork of `flutter_inappwebview`.
+Based on `flutter_inappwebview_ios` 1.2.0-beta.3, with:
+
+- Fixed windowId JavaScript crash on iOS 14-17
+- Fixed callAsyncJavaScript crashes before iOS 18
+- Fixed Dart-side headless webview controller leak on conversion to widget
+
 ## 1.2.0-beta.3
 
 - Updated flutter_inappwebview_platform_interface version to ^1.4.0-beta.3

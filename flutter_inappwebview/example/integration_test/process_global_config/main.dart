@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_inappwebview_ultra/flutter_inappwebview.dart';
 import 'package:path_provider/path_provider.dart';
 import '../util.dart';
 
