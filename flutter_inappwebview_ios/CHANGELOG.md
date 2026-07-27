@@ -53,7 +53,7 @@ Based on `flutter_inappwebview_ios` 1.2.0-beta.3, with:
 
 - Updated flutter_inappwebview_platform_interface version
 
-## ## 1.1.0+2
+## 1.1.0+2
 
 - Updated pubspec.yaml
 
