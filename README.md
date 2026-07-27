@@ -5,13 +5,18 @@
 
 An iOS stability fork of
 [`flutter_inappwebview`](https://github.com/pichillilorenzo/flutter_inappwebview),
-based on upstream `6.2.0-beta.3`. It keeps the original Dart package names,
-imports, and public API unchanged.
+based on upstream `6.2.0-beta.3`. The public Dart API is unchanged; the
+packages are renamed so the fork can be published to pub.dev and consumed as a
+regular hosted dependency:
+
+| Package | Source | Role |
+| --- | --- | --- |
+| [`flutter_inappwebview_ultra`](https://pub.dev/packages/flutter_inappwebview_ultra) | this fork | app-facing package (was `flutter_inappwebview`) |
+| [`flutter_inappwebview_ultra_ios`](https://pub.dev/packages/flutter_inappwebview_ultra_ios) | this fork | iOS implementation with the stability fixes (was `flutter_inappwebview_ios`) |
+| `flutter_inappwebview_android` / `_macos` / `_web` / `_windows` / `_linux` | upstream pub.dev | unchanged platform implementations, endorsed as-is |
 
 This fork is intended for applications affected by WebKit crashes while
-evaluating JavaScript on iOS. It is not an official upstream release. Other
-platform implementations continue to use the upstream packages unless you
-override them separately.
+evaluating JavaScript on iOS. It is not an official upstream release.
 
 ## What this fork fixes
 
@@ -30,47 +35,80 @@ override them separately.
   completion callback.
 - Adds regression coverage for ordinary WebViews, custom content worlds, and
   popup WebViews.
+- Releases the Dart-side headless webview controller state when a
+  `HeadlessInAppWebView` is converted to an `InAppWebView` widget, fixing a
+  per-conversion memory leak. The fix is in this repository for iOS, macOS,
+  Android and Windows, but only the iOS package is published — consumers
+  receive it on iOS only, since the other platforms resolve to unchanged
+  upstream packages.
+- Documents the destructive, process-wide scope of the deprecated
+  `InAppWebViewController.clearCache` so callers do not mistake it for a
+  cache-only purge.
 
 The relevant fix revisions are
-[`25983d411`](https://github.com/liu731/flutter_inappwebview_ultra/commit/25983d4110964cf4bbb2e5cbef31d87ef47120e2)
+[`25983d411`](https://github.com/liu731/flutter_inappwebview_ultra/commit/25983d4110964cf4bbb2e5cbef31d87ef47120e2),
+[`1aec83b55`](https://github.com/liu731/flutter_inappwebview_ultra/commit/1aec83b55f8d5f6d9e2691904b99a76e4175b101)
 and
-[`1aec83b55`](https://github.com/liu731/flutter_inappwebview_ultra/commit/1aec83b55f8d5f6d9e2691904b99a76e4175b101).
+[`4583371ee`](https://github.com/liu731/flutter_inappwebview_ultra/commit/4583371ee).
 
 ## Installation
 
-Because `flutter_inappwebview` is a federated plugin, pointing only the main
-package at this repository is not enough: Pub would still resolve the hosted
-`flutter_inappwebview_ios` package. Override the iOS implementation as well.
-
-For reproducible application builds, pin both Git dependencies to the tested
-fix revision:
+Add the hosted package:
 
 ```yaml
 dependencies:
-  flutter_inappwebview:
+  flutter_inappwebview_ultra: ^1.0.0
+```
+
+and use the new import everywhere:
+
+```dart
+import 'package:flutter_inappwebview_ultra/flutter_inappwebview_ultra.dart';
+```
+
+No `dependency_overrides` are needed: `flutter_inappwebview_ultra` endorses
+`flutter_inappwebview_ultra_ios` as its iOS implementation, and the other
+platforms resolve to the upstream packages automatically.
+
+### Migrating from the git-reference setup
+
+If you previously consumed this fork through git dependencies, remove the
+`flutter_inappwebview` git block **and** every `flutter_inappwebview_*`
+entry from `dependency_overrides`, then add the hosted dependency above and
+rewrite the imports:
+
+```bash
+grep -rl --include="*.dart" "package:flutter_inappwebview/" . | xargs sed -i '' \
+  's|package:flutter_inappwebview/flutter_inappwebview.dart|package:flutter_inappwebview_ultra/flutter_inappwebview_ultra.dart|g'
+```
+
+The Dart API is unchanged, so no other code changes are required. Web storage
+(cookies, localStorage) is keyed to the app sandbox by the OS, so an ordinary
+app update along with this migration does not log users out of webview
+sessions.
+
+### Consuming from git instead
+
+For testing unreleased changes you can still reference the repository
+directly. Note the dependency keys use the new package names:
+
+```yaml
+dependencies:
+  flutter_inappwebview_ultra:
     git:
       url: https://github.com/liu731/flutter_inappwebview_ultra.git
-      ref: 1aec83b55f8d5f6d9e2691904b99a76e4175b101
+      ref: main
       path: flutter_inappwebview
 
 dependency_overrides:
-  flutter_inappwebview_ios:
+  flutter_inappwebview_ultra_ios:
     git:
       url: https://github.com/liu731/flutter_inappwebview_ultra.git
-      ref: 1aec83b55f8d5f6d9e2691904b99a76e4175b101
+      ref: main
       path: flutter_inappwebview_ios
 ```
 
-Then resolve the dependency graph:
-
-```bash
-flutter pub get
-```
-
-Check `pubspec.lock` before committing it. The
-`flutter_inappwebview_ios` entry must use `source: git`, reference this
-repository, and resolve to the pinned revision. You can use `ref: main` while
-testing unreleased changes, but it makes builds non-reproducible.
+Pin `ref` to a commit or tag for reproducible builds.
 
 ## Compatibility notes
 

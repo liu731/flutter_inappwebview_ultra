@@ -83,7 +83,7 @@ Send a submission request to the [Submit App](https://inappwebview.dev/submit-ap
 
 ## Installation
 
-Add `flutter_inappwebview` as a [dependency in your pubspec.yaml file](https://flutter.io/using-packages/).
+Add `flutter_inappwebview_ultra` as a [dependency in your pubspec.yaml file](https://flutter.io/using-packages/).
 
 ### Platform Installation Setup:
 - [Android](https://inappwebview.dev/docs/intro/#setup-android)
