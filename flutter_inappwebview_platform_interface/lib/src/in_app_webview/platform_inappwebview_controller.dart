@@ -1475,7 +1475,21 @@ abstract class PlatformInAppWebViewController extends PlatformInterface
   }
 
   ///{@template flutter_inappwebview_platform_interface.PlatformInAppWebViewController.clearCache}
-  ///Use [PlatformInAppWebViewController.clearAllCache] instead
+  ///Use [PlatformInAppWebViewController.clearAllCache] instead.
+  ///
+  ///**WARNING**: on every supported platform this is not a cache purge. It
+  ///discards browsing data process-wide, so it will log out and wipe the stored
+  ///data of every other live webview in the app, including cookies set through
+  ///[PlatformCookieManager] and data written through [PlatformWebStorage].
+  ///
+  ///On iOS and macOS it removes every website data type - cookies,
+  ///localStorage, IndexedDB, WebSQL and service workers as well as caches - for
+  ///all origins, and it does so on the process-wide default data store rather
+  ///than this webview's own store. On Android it additionally removes all
+  ///cookies, all saved form data and all web storage data.
+  ///
+  ///Prefer [PlatformInAppWebViewController.clearAllCache], which is limited to
+  ///cache data types on all platforms.
   ///{@endtemplate}
   ///
   ///{@macro flutter_inappwebview_platform_interface.PlatformInAppWebViewController.clearCache.supported_platforms}
