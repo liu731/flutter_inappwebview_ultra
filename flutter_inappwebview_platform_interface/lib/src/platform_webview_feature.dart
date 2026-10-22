@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:flutter_inappwebview_internal_annotations/flutter_inappwebview_internal_annotations.dart';
 import 'inappwebview_platform.dart';
+import 'multi_profile_support_stub.dart'
+    if (dart.library.io) 'multi_profile_support_io.dart';
 
 part 'platform_webview_feature.g.dart';
 
@@ -142,6 +144,22 @@ abstract class PlatformWebViewFeature extends PlatformInterface {
     );
   }
 
+  /// Whether this device can keep a second website profile, with its own
+  /// cookies, beside the default one.
+  ///
+  /// Android asks the WebView selected by the system. iOS is true from iOS 17.
+  /// Other platforms return false. This does not create a profile.
+  Future<bool> isMultiProfileSupported() {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return isFeatureSupported(WebViewFeature.MULTI_PROFILE);
+      case TargetPlatform.iOS:
+        return Future<bool>.value(currentIosSupportsPersistentProfile());
+      default:
+        return Future<bool>.value(false);
+    }
+  }
+
   ///{@macro flutter_inappwebview_platform_interface.PlatformWebViewFeatureCreationParams.isClassSupported}
   bool isClassSupported({TargetPlatform? platform}) =>
       params.isClassSupported(platform: platform);
@@ -203,6 +221,16 @@ class WebViewFeature_ {
 
   ///
   static const MULTI_PROCESS = const WebViewFeature_._internal("MULTI_PROCESS");
+
+  ///Feature for [isFeatureSupported].
+  ///
+  ///Android only. True when the WebView currently selected by the system
+  ///supports a second persistent profile, including its own [CookieManager].
+  ///This covers `ProfileStore.getOrCreateProfile` and `WebViewCompat.setProfile`.
+  ///It does not create a profile.
+  ///
+  ///**Official Android API**: https://developer.android.com/reference/androidx/webkit/WebViewFeature#MULTI_PROFILE
+  static const MULTI_PROFILE = const WebViewFeature_._internal("MULTI_PROFILE");
 
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.offscreenPreRaster].
   static const OFF_SCREEN_PRERASTER = const WebViewFeature_._internal(
@@ -477,6 +505,18 @@ class AndroidWebViewFeature_ {
   ///
   static const MULTI_PROCESS = const AndroidWebViewFeature_._internal(
     "MULTI_PROCESS",
+  );
+
+  ///Feature for [isFeatureSupported].
+  ///
+  ///True when the WebView currently selected by the system supports a second
+  ///persistent profile, including its own cookie manager.
+  ///This covers `ProfileStore.getOrCreateProfile` and `WebViewCompat.setProfile`.
+  ///It does not create a profile.
+  ///
+  ///**Official Android API**: https://developer.android.com/reference/androidx/webkit/WebViewFeature#MULTI_PROFILE
+  static const MULTI_PROFILE = const AndroidWebViewFeature_._internal(
+    "MULTI_PROFILE",
   );
 
   ///
