@@ -661,6 +661,12 @@ public class InAppWebViewChromeClient extends WebChromeClient implements PluginR
 
     if (plugin != null && plugin.inAppWebViewManager != null) {
       plugin.inAppWebViewManager.windowWebViewMessages.put(windowId, resultMsg);
+      if (inAppWebView != null) {
+        String profileName = inAppWebView.profileNameForNewWindow();
+        if (profileName != null) {
+          plugin.inAppWebViewManager.windowProfileNames.put(windowId, profileName);
+        }
+      }
     }
 
     if (inAppWebView != null && inAppWebView.channelDelegate != null) {
@@ -675,6 +681,7 @@ public class InAppWebViewChromeClient extends WebChromeClient implements PluginR
         public void defaultBehaviour(@Nullable Boolean handledByClient) {
           if (plugin != null && plugin.inAppWebViewManager != null) {
             plugin.inAppWebViewManager.windowWebViewMessages.remove(finalWindowId);
+            plugin.inAppWebViewManager.windowProfileNames.remove(finalWindowId);
           }
         }
 
@@ -688,6 +695,9 @@ public class InAppWebViewChromeClient extends WebChromeClient implements PluginR
       return true;
     }
 
+    if (plugin != null && plugin.inAppWebViewManager != null) {
+      plugin.inAppWebViewManager.windowProfileNames.remove(windowId);
+    }
     return false;
   }
 

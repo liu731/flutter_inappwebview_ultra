@@ -231,7 +231,19 @@ public class InAppBrowserWebViewController: UIViewController, InAppBrowserDelega
     }
     
     public func prepareWebView() {
-        webView?.settings = webViewSettings
+        let inheritedProfile = webView?.settings?.profileName
+        if let webViewSettings = webViewSettings {
+            if let canonical = WebViewProfileIdentifier.canonical(inheritedProfile) {
+                webViewSettings.profileName = canonical
+            } else if windowId != nil {
+                webViewSettings.profileName = nil
+            } else if let canonical = WebViewProfileIdentifier.canonical(webViewSettings.profileName) {
+                webViewSettings.profileName = canonical
+            } else {
+                webViewSettings.profileName = nil
+            }
+            webView?.settings = webViewSettings
+        }
         webView?.prepare()
               
         searchBar = UISearchBar()

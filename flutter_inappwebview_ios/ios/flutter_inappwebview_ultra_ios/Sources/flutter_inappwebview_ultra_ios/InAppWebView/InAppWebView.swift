@@ -24,6 +24,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     var inAppBrowserDelegate: InAppBrowserDelegate?
     var channelDelegate: WebViewChannelDelegate?
     var settings: InAppWebViewSettings?
+    /// Profile chosen when this web view was created. Later settings cannot switch it.
+    var appliedProfileName: String?
     var pullToRefreshControl: PullToRefreshControl?
     var findInteractionController: FindInteractionController?
     var webMessageChannels: [String: WebMessageChannel] = [:]
@@ -375,6 +377,13 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
 
     public func prepare() {
+        if appliedProfileName == nil {
+            appliedProfileName = WebViewProfileIdentifier.canonical(settings?.profileName)
+        }
+        if let appliedProfileName = appliedProfileName {
+            settings?.profileName = appliedProfileName
+        }
+
         if #available(iOS 17.2, *) {
             // Fix https://github.com/pichillilorenzo/flutter_inappwebview/issues/1947
             NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification:)),
@@ -676,7 +685,14 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             }
             
             if #available(iOS 9.0, *) {
-                if settings.incognito {
+                if WebViewProfileIdentifier.isNamed(settings.profileName) {
+                    if let profileStore = WebViewProfileIdentifier.dataStore(for: settings.profileName) {
+                        configuration.websiteDataStore = profileStore
+                    } else {
+                        NSLog("profileName is ignored because a persistent second profile requires iOS 17")
+                        configuration.websiteDataStore = WKWebsiteDataStore.default()
+                    }
+                } else if settings.incognito {
                     configuration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
                 } else if settings.cacheEnabled {
                     configuration.websiteDataStore = WKWebsiteDataStore.default()
@@ -708,7 +724,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 for scheme in settings.resourceCustomSchemes {
                     configuration.setURLSchemeHandler(CustomSchemeHandler(), forURLScheme: scheme)
                 }
-                if settings.sharedCookiesEnabled {
+                if settings.sharedCookiesEnabled && !WebViewProfileIdentifier.isNamed(settings.profileName) {
                     // More info to sending cookies with WKWebView
                     // https://stackoverflow.com/questions/26573137/can-i-set-the-cookies-to-be-used-by-a-wkwebview/26577303#26577303
                     // Set Cookies in iOS 11 and above, initialize websiteDataStore before setting cookies
@@ -1033,7 +1049,17 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     }
     
     func setSettings(newSettings: InAppWebViewSettings, newSettingsMap: [String: Any]) {
-        
+        // The website data store is fixed at creation. Keep that name so a later
+        // sharedCookiesEnabled cannot copy the shared jar into it.
+        if appliedProfileName == nil {
+            appliedProfileName = WebViewProfileIdentifier.canonical(settings?.profileName)
+        }
+        if let appliedProfileName = appliedProfileName {
+            newSettings.profileName = appliedProfileName
+        } else {
+            newSettings.profileName = nil
+        }
+
         // MUST be the first! In this way, all the settings that uses evaluateJavaScript can be applied/blocked!
         if #available(iOS 13.0, *) {
             if newSettingsMap["applePayAPIEnabled"] != nil && settings?.applePayAPIEnabled != newSettings.applePayAPIEnabled {
@@ -1082,7 +1108,8 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             }
         }
         
-        if #available(iOS 9.0, *) {
+        let keepsNamedProfile = WebViewProfileIdentifier.isNamed(settings?.profileName) || WebViewProfileIdentifier.isNamed(newSettings.profileName)
+        if #available(iOS 9.0, *), !keepsNamedProfile {
             if (newSettingsMap["incognito"] != nil && settings?.incognito != newSettings.incognito && newSettings.incognito) {
                 configuration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
             } else if (newSettingsMap["cacheEnabled"] != nil && settings?.cacheEnabled != newSettings.cacheEnabled && newSettings.cacheEnabled) {
@@ -1091,7 +1118,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         }
         
         if #available(iOS 11.0, *) {
-            if (newSettingsMap["sharedCookiesEnabled"] != nil && settings?.sharedCookiesEnabled != newSettings.sharedCookiesEnabled && newSettings.sharedCookiesEnabled) {
+            if !keepsNamedProfile && (newSettingsMap["sharedCookiesEnabled"] != nil && settings?.sharedCookiesEnabled != newSettings.sharedCookiesEnabled && newSettings.sharedCookiesEnabled) {
                 if(!newSettings.incognito && !newSettings.cacheEnabled) {
                     configuration.websiteDataStore = WKWebsiteDataStore.nonPersistent()
                 }
@@ -2682,6 +2709,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         
         let windowWebView = InAppWebView(id: nil, plugin: nil, frame: self.bounds, configuration: configuration, contextMenu: nil)
         windowWebView.windowId = windowId
+        if let canonical = WebViewProfileIdentifier.canonical(appliedProfileName ?? settings?.profileName) {
+            let carried = InAppWebViewSettings()
+            carried.profileName = canonical
+            windowWebView.settings = carried
+        }
 
         let webViewTransport = WebViewTransport(
             webView: windowWebView,

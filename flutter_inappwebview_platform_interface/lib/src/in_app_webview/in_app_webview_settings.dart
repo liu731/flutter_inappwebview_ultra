@@ -432,6 +432,17 @@ because there isn't any way to make the website data store non-persistent for th
   )
   bool? incognito;
 
+  ///Name of a persistent website profile, separate from the default one.
+  ///
+  ///Null or empty keeps the default profile. The same name on Android and iOS
+  ///keeps one cookie jar for that name. Set it when the WebView is created.
+  ///Changing it later has no effect. Do not combine it with [incognito] or
+  ///[sharedCookiesEnabled]. Unsupported devices keep the default profile.
+  ///
+  ///Ask [WebViewFeature.isMultiProfileSupported] before relying on a split.
+  @SupportedPlatforms(platforms: [AndroidPlatform(), IOSPlatform()])
+  String? profileName;
+
   ///Sets whether WebView should use browser caching. The default value is `true`.
   @SupportedPlatforms(
     platforms: [AndroidPlatform(), IOSPlatform(), MacOSPlatform()],
@@ -3300,6 +3311,7 @@ as it can cause framerate drops on animations in Android 9 and lower (see [Hybri
     this.interceptOnlyAsyncAjaxRequests = true,
     this.useShouldInterceptFetchRequest,
     this.incognito = false,
+    this.profileName,
     this.cacheEnabled = true,
     this.transparentBackground = false,
     this.disableVerticalScroll = false,

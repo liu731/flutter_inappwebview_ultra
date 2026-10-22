@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview_platform_interface/src/multi_profile_support_io.dart';
 import 'package:flutter_inappwebview_platform_interface/flutter_inappwebview_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,6 +28,27 @@ void main() {
     expect(
       AndroidWebViewFeature.values,
       contains(AndroidWebViewFeature.MULTI_PROFILE),
+    );
+  });
+
+  test('profileName is one setting for both platforms', () {
+    final settings = InAppWebViewSettings(profileName: '1688');
+    expect(settings.toMap()['profileName'], '1688');
+    final restored = InAppWebViewSettings.fromMap(settings.toMap())!;
+    expect(restored.profileName, '1688');
+    expect(
+      InAppWebViewSettings.isPropertySupported(
+        InAppWebViewSettingsProperty.profileName,
+        platform: TargetPlatform.android,
+      ),
+      isTrue,
+    );
+    expect(
+      InAppWebViewSettings.isPropertySupported(
+        InAppWebViewSettingsProperty.profileName,
+        platform: TargetPlatform.iOS,
+      ),
+      isTrue,
     );
   });
 

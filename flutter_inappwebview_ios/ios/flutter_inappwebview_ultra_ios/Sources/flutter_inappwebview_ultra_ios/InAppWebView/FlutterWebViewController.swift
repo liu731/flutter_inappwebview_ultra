@@ -51,6 +51,12 @@ public class FlutterWebViewController: NSObject, FlutterPlatformView, Disposable
             webView!.frame = myView!.bounds
             webView!.contextMenu = contextMenu
             webView!.initialUserScripts = userScripts
+            // WebKit already copied the opener data store. The child cannot pick another one.
+            if let canonical = WebViewProfileIdentifier.canonical(webView!.settings?.profileName) {
+                settings.profileName = canonical
+            } else {
+                settings.profileName = nil
+            }
         } else {
             webView = InAppWebView(id: viewId,
                                    plugin: plugin,

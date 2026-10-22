@@ -254,8 +254,75 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
     }
   }
 
+  private String appliedProfileName;
+
+  private static String canonicalProfileName(String name) {
+    if (name == null) {
+      return null;
+    }
+    String trimmed = name.trim();
+    if (trimmed.isEmpty() || "Default".equals(trimmed)) {
+      return null;
+    }
+    return trimmed;
+  }
+
+  private static boolean isNamedProfile(String name) {
+    return canonicalProfileName(name) != null;
+  }
+
+  private boolean hasPersistentProfile() {
+    return isNamedProfile(appliedProfileName)
+            || (customSettings != null && isNamedProfile(customSettings.profileName));
+  }
+
+  String profileNameForNewWindow() {
+    String applied = canonicalProfileName(appliedProfileName);
+    if (applied != null) {
+      return applied;
+    }
+    return customSettings == null ? null : canonicalProfileName(customSettings.profileName);
+  }
+
+  // A named profile must be chosen before any page load. A popup cannot pick
+  // its own jar: WebViewCompat.setProfile would move it off the opener.
+  private void applyPersistentProfile() {
+    if (windowId != null) {
+      String inherited = null;
+      if (plugin != null && plugin.inAppWebViewManager != null) {
+        inherited = canonicalProfileName(
+                plugin.inAppWebViewManager.windowProfileNames.remove(windowId));
+      }
+      if (customSettings != null) {
+        customSettings.profileName = inherited;
+      }
+      if (inherited == null) {
+        appliedProfileName = null;
+        return;
+      }
+    }
+    String name = customSettings == null ? null : canonicalProfileName(customSettings.profileName);
+    if (name == null) {
+      return;
+    }
+    customSettings.profileName = name;
+    customSettings.incognito = false;
+    appliedProfileName = name;
+    if (!WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+      Log.w(LOG_TAG, "profileName is ignored because MULTI_PROFILE is not supported");
+      return;
+    }
+    try {
+      WebViewCompat.setProfile(this, name);
+    } catch (RuntimeException ex) {
+      Log.e(LOG_TAG, "setProfile failed", ex);
+    }
+  }
+
   @SuppressLint("RestrictedApi")
   public void prepare() {
+    applyPersistentProfile();
+
     if (customSettings.alpha != null) {
       setAlpha(customSettings.alpha.floatValue());
     }
@@ -423,7 +490,7 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
       setDesktopMode(true);
     }
     settings.setSaveFormData(customSettings.saveFormData);
-    if (customSettings.incognito)
+    if (customSettings.incognito && !hasPersistentProfile())
       setIncognito(true);
     if (customSettings.useHybridComposition) {
       if (customSettings.hardwareAcceleration)
@@ -828,6 +895,20 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
 
   @SuppressLint("RestrictedApi")
   public void setSettings(InAppWebViewSettings newCustomSettings, HashMap<String, Object> newSettingsMap) {
+    // The profile is fixed at creation. A later settings update must not drop it
+    // or point at a different jar.
+    String keptProfile = canonicalProfileName(appliedProfileName);
+    if (keptProfile == null && customSettings != null) {
+      keptProfile = canonicalProfileName(customSettings.profileName);
+    }
+    if (keptProfile != null) {
+      newCustomSettings.profileName = keptProfile;
+      if (appliedProfileName == null) {
+        appliedProfileName = keptProfile;
+      }
+    } else {
+      newCustomSettings.profileName = null;
+    }
 
     WebSettings settings = getSettings();
 
@@ -1098,7 +1179,9 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
     if (newSettingsMap.get("saveFormData") != null && customSettings.saveFormData != newCustomSettings.saveFormData)
       settings.setSaveFormData(newCustomSettings.saveFormData);
 
-    if (newSettingsMap.get("incognito") != null && customSettings.incognito != newCustomSettings.incognito)
+    if (newSettingsMap.get("incognito") != null
+            && !hasPersistentProfile()
+            && customSettings.incognito != newCustomSettings.incognito)
       setIncognito(newCustomSettings.incognito);
 
     if (customSettings.useHybridComposition) {
@@ -2204,6 +2287,7 @@ final public class InAppWebView extends InputAwareWebView implements InAppWebVie
     }
     if (windowId != null && plugin != null && plugin.inAppWebViewManager != null) {
       plugin.inAppWebViewManager.windowWebViewMessages.remove(windowId);
+      plugin.inAppWebViewManager.windowProfileNames.remove(windowId);
     }
     mainLooperHandler.removeCallbacksAndMessages(null);
     mHandler.removeCallbacksAndMessages(null);

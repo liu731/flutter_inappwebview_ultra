@@ -54,6 +54,8 @@ public class InAppWebViewSettings implements ISettings<InAppWebViewInterface> {
   public Boolean interceptOnlyAsyncAjaxRequests = true;
   public Boolean useShouldInterceptFetchRequest = false;
   public Boolean incognito = false;
+  @Nullable
+  public String profileName;
   public Boolean cacheEnabled = true;
   public Boolean transparentBackground = false;
   public Boolean disableVerticalScroll = false;
@@ -236,6 +238,9 @@ public class InAppWebViewSettings implements ISettings<InAppWebViewInterface> {
           break;
         case "incognito":
           incognito = (Boolean) value;
+          break;
+        case "profileName":
+          profileName = (String) value;
           break;
         case "cacheEnabled":
           cacheEnabled = (Boolean) value;
@@ -514,6 +519,7 @@ public class InAppWebViewSettings implements ISettings<InAppWebViewInterface> {
     settings.put("interceptOnlyAsyncAjaxRequests", interceptOnlyAsyncAjaxRequests);
     settings.put("useShouldInterceptFetchRequest", useShouldInterceptFetchRequest);
     settings.put("incognito", incognito);
+    settings.put("profileName", profileName);
     settings.put("cacheEnabled", cacheEnabled);
     settings.put("transparentBackground", transparentBackground);
     settings.put("disableVerticalScroll", disableVerticalScroll);

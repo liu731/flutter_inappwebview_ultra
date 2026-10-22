@@ -40,6 +40,7 @@ public class InAppWebViewManager extends ChannelDelegateImpl {
   public final Map<String, FlutterWebView> keepAliveWebViews = new HashMap<>();
 
   public final Map<Integer, Message> windowWebViewMessages = new HashMap<>();
+  public final Map<Integer, String> windowProfileNames = new HashMap<>();
   public int windowAutoincrementId = 0;
 
   public InAppWebViewManager(final InAppWebViewFlutterPlugin plugin) {
@@ -234,6 +235,7 @@ public class InAppWebViewManager extends ChannelDelegateImpl {
     }
     keepAliveWebViews.clear();
     windowWebViewMessages.clear();
+    windowProfileNames.clear();
     plugin = null;
   }
 }

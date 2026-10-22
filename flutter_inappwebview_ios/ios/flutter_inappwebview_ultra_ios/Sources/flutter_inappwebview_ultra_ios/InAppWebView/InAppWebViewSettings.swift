@@ -32,6 +32,7 @@ public class InAppWebViewSettings: ISettings<InAppWebView> {
     var interceptOnlyAsyncAjaxRequests = true
     var useShouldInterceptFetchRequest = false
     var incognito = false
+    var profileName: String? = nil
     var cacheEnabled = true
     var transparentBackground = false
     var disableVerticalScroll = false
